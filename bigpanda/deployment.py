@@ -4,6 +4,13 @@ class Deployment(object):
     """
     BigPanda deployment object.
 
+    Example:
+        >> bp = bigpanda.Client(api_token='0123479abadsfgab')
+        >> deployment = bp.deployment("myapp", "v1.0", "prod-app-4")
+        >> deployment.start()
+        ...
+        >> deployment.success()
+
     methods:
     start():            Mark deployment as started
     success():          Mark deployment as successful
