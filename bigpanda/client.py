@@ -9,11 +9,11 @@ class Client(object):
         self.api_token = api_token
         self.base_url = base_url
 
-    def deployment(self, component, version, hosts, owner=None, source=None, env=None):
+    def deployment(self, component, version, hosts, owner=None, env=None):
         """
         Return a new Deployment object. Refer to bigpanda.Deployment for more help.
         """
-        return deployment.Deployment(self, component, version, hosts, owner, source, env)
+        return deployment.Deployment(self, component, version, hosts, owner, env)
 
     def api_call(self, endpoint, data=None):
         headers = {'Authorization': 'Bearer %s' % self.api_token,

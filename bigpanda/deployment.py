@@ -29,7 +29,6 @@ class Deployment(object):
         version:    Version of the application being deployed
         hosts:      Name or list of names of the hosts being deployed on
         owner:      Optional name of the person responsible
-        source:     Optional name of the system triggering this deployment (ex: Fabric)
         env:        Optional name of the environment being deployed on (ex: stage)
         """
         if not isinstance(hosts, list):
@@ -40,7 +39,7 @@ class Deployment(object):
         self.version = version
         self.hosts = hosts
         self.owner = owner
-        self.source = source
+        self.source_system = "python"
         self.env = env
 
     def start(self):
@@ -51,7 +50,7 @@ class Deployment(object):
                           version=self.version,
                           hosts=self.hosts,
                           owner=self.owner,
-                          source=self.source,
+                          source_system=self.source_system,
                           env=self.env)
         call_data = dict()
         for k in tmp_call_data:
