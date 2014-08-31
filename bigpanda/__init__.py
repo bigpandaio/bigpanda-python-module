@@ -18,3 +18,4 @@ Example:
 """
 from client import Client
 from deployment import Deployment
+from alert import Alert

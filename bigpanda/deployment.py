@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 class Deployment(object):
     """
     BigPanda deployment object.
