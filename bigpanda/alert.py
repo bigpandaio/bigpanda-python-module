@@ -71,7 +71,7 @@ class Alert(object):
         try:
             payload['status'] = api_statuses[self.status]
         except KeyError:
-            raise ValueError("status must be one of: " % ", ".join(api_statuses))
+            raise ValueError("status must be one of: " + ", ".join(api_statuses))
 
         if self.check:
             payload[self.secondary_attr] = str(self.check)
@@ -93,7 +93,7 @@ class Alert(object):
 
         return payload
 
-    def send(self, status):
+    def send(self):
         if not self._client:
             raise Exception("No client associated. Use Client.send() instead.")
         self._client.send(self)
@@ -110,11 +110,8 @@ class Alert(object):
         if self.check and not self.secondary_attr:
             raise ValueError("Secondary attribute name can't be empty")
 
-        if not self.app_key:
-            raise ValueError("App key can't be empty")
-
-        if timestamp:
+        if self.timestamp:
             try:
-                self.timestamp = int(timestamp)
+                self.timestamp = int(self.timestamp)
             except Exception as e:
                 raise ValueError("Timestamp must be in unix time")

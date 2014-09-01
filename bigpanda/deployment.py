@@ -94,7 +94,7 @@ class Deployment(object):
                 if value:
                     payload[attr] = value
         else:
-            payload[status] = self.status
+            payload['status'] = self.status
 
         if self.status == 'failure' and self.message:
             payload['errorMessage'] = str(self.message)

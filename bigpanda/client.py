@@ -8,20 +8,20 @@ import alert
 class Client(object):
     def __init__(self, api_token, app_key=None, base_url=config.base_url):
         self.api_token = api_token
-        selff.app_key = app_key
+        self.app_key = app_key
         self.base_url = base_url
 
-    def deployment(self, component, version, hosts, owner=None, env=None):
+    def deployment(self, component, version, hosts, status='start', owner=None, env=None):
         """
         Return a new Deployment object. Refer to bigpanda.Deployment for more help.
         """
-        return deployment.Deployment(self, component, version, hosts, owner, env)
+        return deployment.Deployment(component, version, hosts, status, owner, env, client=self)
 
-    def alert(self, app_key, subject, check=None, description=None, cluster=None, timestamp=None, primary_attr='host', secondary_attr='check', **kwargs):
+    def alert(self, status, subject, check=None, description=None, cluster=None, timestamp=None, primary_attr='host', secondary_attr='check', **kwargs):
         """
         Return a new Alert object. Refer to bigpanda.Alert for more help.
         """
-        return alert.Alert(self, app_key, subject, check, description, cluster, timestamp, primary_attr, secondary_attr, **kwargs)
+        return alert.Alert(status, subject, check, description, cluster, timestamp, primary_attr, secondary_attr, client=self, **kwargs)
 
     def send(self, data):
         """
@@ -39,7 +39,7 @@ class Client(object):
 
             messages = list()
             for m in data:
-                messages.append(m._build_payload)
+                messages.append(m._build_payload())
             payload = dict(alerts=messages)
             endpoint = data[0]._endpoint
         else:
