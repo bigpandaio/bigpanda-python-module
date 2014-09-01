@@ -65,3 +65,9 @@ class Client(object):
             r = requests.get(self.base_url + endpoint, headers=headers)
 
         r.raise_for_status()
+
+    def _get_data_type(self, data):
+        if isinstance(data, list):
+            return type(data[0]).__name__.lower()
+        else:
+            return type(data).__name__.lower()

@@ -6,36 +6,36 @@ class Alert(object):
 
     Example:
         >> bp = bigpanda.Client(api_token='0123479abadsfgab')
-        >> alert = bp.alert("host1", "ping check")
-        >> alert.warn()
+        >> alert = bp.alert("warn", "host1", "ping check")
+        >> alert.send()
         ...
-        >> alert.crit()
+        >> alert.status = 'crit'
+        >> alert.send()
         ...
-        >> alert.ack()
+        >> alert.status = 'ack'
+        >> alert.send()
         ...
-        >> alert.ok()
+        >> alert.status = 'ok'
+        >> alert.send()
 
     methods:
-    ok:         Set alert status to OK
-    warn():     Set alert status to Warning
-    crit():     Set alert status to Critical
-    ack():      Mark alert as acknowledged
+    send(): Send alert to server
     """
 
-    alert_endpoint = '/data/v2/alerts'
+    _endpoint = '/data/v2/alerts'
 
-    def __init__(self, client, app_key, subject, check=None, description=None, cluster=None, timestamp=None, primary_attr='host', secondary_attr='check', **kwargs):
+    def __init__(self, status, subject, check=None, description=None, cluster=None, timestamp=None, primary_attr='host', secondary_attr='check', client=None, **kwargs):
         """
         Create a new alert.
-        client:         Client object. Client.alert() passes this object for you
-        app_key:        Application key, generated from the alerts API instructions
-        subject:        Name of host/application/service etc
-        check:          Specific alert about the subject
+        status:         Status of alert. One of: ok, warn, crit, ack
+        subject:        Primary attribute. Name of host/application/service etc.
+        check:          Secondary attribute. Specific alert about the subject.
         description:    Text description of the alert
         cluster:        Name of cluster/logical group the subject is in
         timestamp:      Unix time of alert (default is now)
         primary_attr:   Primary attribute name (default is `host')
         secondary_attr: Secondary attribute name (default is `check')
+        client:         Client object. Client.alert() passes this object for you
 
         Extra custom attributes can be passed as keyword arguments.
         """
@@ -49,8 +49,7 @@ class Alert(object):
         if check and not secondary_attr:
             raise ValueError("Secondary attribute name can't be empty")
 
-        self._client = client
-        self.app_key = app_key
+        self.status = status
         self.subject = subject
         self.check = check
         self.description = description
@@ -59,16 +58,20 @@ class Alert(object):
         self.primary_attr = primary_attr
         self.secondary_attr = secondary_attr
         self.extra_attrs = kwargs
+        self._client = client
 
-    def _build_payload(self, status):
+    def _build_payload(self):
+        self._verify_parameters()
+
         payload = dict()
         payload[self.primary_attr] = str(self.subject)
         payload["primary_property"] = str(self.primary_attr)
 
         api_statuses = dict(ok='ok', warn='warning', crit='critical', ack='acknowledged')
-        payload['status'] = api_statuses[status]
-
-        payload['app_key'] = str(self.app_key)
+        try:
+            payload['status'] = api_statuses[self.status]
+        except KeyError:
+            raise ValueError("status must be one of: " % ", ".join(api_statuses))
 
         if self.check:
             payload[self.secondary_attr] = str(self.check)
@@ -90,34 +93,10 @@ class Alert(object):
 
         return payload
 
-    def ok(self):
-        """
-        Send the alert with status OK to BigPanda
-        """
-        return self._send_alert('ok')
-
-    def warn(self):
-        """
-        Send the alert with status Warning to BigPanda
-        """
-        return self._send_alert('warn')
-
-    def crit(self):
-        """
-        Send the alert with status Critical to BigPanda
-        """
-        return self._send_alert('crit')
-
-    def ack(self):
-        """
-        Mark the alert as Acknowledged in BigPanda
-        """
-        return self._send_alert('ack')
-
-    def _send_alert(self, status):
-        self._verify_parameters
-        payload = self._build_payload(status)
-        self._client.api_call(self.alert_endpoint, payload)
+    def send(self, status):
+        if not self._client:
+            raise Exception("No client associated. Use Client.send() instead.")
+        self._client.send(self)
 
         return self
 
