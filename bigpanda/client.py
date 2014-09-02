@@ -1,5 +1,8 @@
 import requests
-import json
+try:
+    import simplejson as json
+except ImportError:
+    import json
 
 import config
 import deployment
