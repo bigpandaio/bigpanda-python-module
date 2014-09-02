@@ -8,7 +8,7 @@ class Deployment(object):
         >> deployment.send() # New deployments are of status 'start' by default
         >> try:
         ...
-        >>   deployment.success()
+        >>   deployment.success() # Set .status and calls send()
         >> except Exception as e:
         >>   deployment.failure(e)
 
@@ -50,7 +50,15 @@ class Deployment(object):
         self.message = message
         self._client = client
 
+        self._verify_parameters()
+
     def send(self):
+        """
+        Send deployment object to server. Returns the deployment object.
+
+        Requires the object to be initialized with `client' parameter. Use
+        Client.send() otherwise.
+        """
         if not self._client:
             raise Exception("No client associated. Use Client.send() instead.")
         self._client.send(self)
@@ -59,7 +67,9 @@ class Deployment(object):
 
     def start(self):
         """
-        Notify BigPanda on the start of this deployment
+        Notify BigPanda on the start of this deployment.
+
+        Equivalent to setting .status to 'start' and calling send().
         """
         self.status = 'start'
         return self.send()
@@ -67,6 +77,8 @@ class Deployment(object):
     def success(self):
         """
         Notify BigPanda this deployment has succeeded
+
+        Equivalent to setting .status to 'success' and calling send().
         """
         self.status = 'success'
         return self.send()
@@ -76,17 +88,22 @@ class Deployment(object):
         Notify BigPanda this deployment has succeeded.
 
         message is an optional error message.
+
+        Equivalent to setting .status to 'failure' and .message, then calling send().
         """
         self.status = 'failure'
         return self.send()
 
+    def _verify_parameters(self):
+        if self.status not in ('start', 'success', 'failure'):
+            raise ValueError("status must be one of start, success, failure")
+
     def _build_payload(self):
+        self._verify_parameters()
+
         payload = dict( component=self.component,
                         version=self.version,
                         hosts=self.hosts )
-
-        if self.status not in ('start', 'success', 'failure'):
-            raise ValueError("status must be one of start, success, failure")
 
         if self.status == 'start':
             for attr in 'owner', 'source_system', 'env', 'description':

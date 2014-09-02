@@ -11,18 +11,22 @@ class Alert(object):
         ...
         >> alert.status = 'crit'
         >> alert.send()
-        ...
-        >> alert.status = 'ack'
-        >> alert.send()
-        ...
+
+        # Create an alert with a custom attribute
+        >> custom_alert = bp.alert("crit", "myapp", "app connections", connections=124)
+        >> custom_alert.send()
+
+        # Update alerts in batch mode
+        >> custom_alert.status = 'ack'
         >> alert.status = 'ok'
-        >> alert.send()
+        >> bp.send([alert, custom_alert])
 
     methods:
     send(): Send alert to server
     """
 
     _endpoint = '/data/v2/alerts'
+    _api_statuses = dict(ok='ok', warn='warning', crit='critical', ack='acknowledged')
 
     def __init__(self, status, subject, check=None, description=None, cluster=None, timestamp=None, primary_attr='host', secondary_attr='check', client=None, **kwargs):
         """
@@ -59,6 +63,8 @@ class Alert(object):
         self.secondary_attr = secondary_attr
         self.extra_attrs = kwargs
         self._client = client
+        
+        self._verify_parameters()
 
     def _build_payload(self):
         self._verify_parameters()
@@ -67,9 +73,8 @@ class Alert(object):
         payload[self.primary_attr] = str(self.subject)
         payload["primary_property"] = str(self.primary_attr)
 
-        api_statuses = dict(ok='ok', warn='warning', crit='critical', ack='acknowledged')
         try:
-            payload['status'] = api_statuses[self.status]
+            payload['status'] = self._api_statuses[self.status]
         except KeyError:
             raise ValueError("status must be one of: " + ", ".join(api_statuses))
 
@@ -94,6 +99,12 @@ class Alert(object):
         return payload
 
     def send(self):
+        """
+        Send alert object to server. Returns the alert object.
+
+        Requires the object to be initialized with `client' parameter. Use
+        Client.send() otherwise.
+        """
         if not self._client:
             raise Exception("No client associated. Use Client.send() instead.")
         self._client.send(self)
@@ -115,3 +126,6 @@ class Alert(object):
                 self.timestamp = int(self.timestamp)
             except Exception as e:
                 raise ValueError("Timestamp must be in unix time")
+
+        if self.status not in self._api_statuses:
+            raise ValueError("Status must be one of: " + ", ".join(self._api_statuses))

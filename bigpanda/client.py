@@ -6,20 +6,33 @@ import deployment
 import alert
 
 class Client(object):
+    """
+    BigPanda Client object, used to send alerts and deployments.
+    """ 
     def __init__(self, api_token, app_key=None, base_url=config.base_url):
+        """
+        Create a new Client object, used to send alerts and deployments.
+
+        api_token:      Your organization's API token
+        app_key:        Application key, required for sending alerts.
+        """
         self.api_token = api_token
         self.app_key = app_key
         self.base_url = base_url
 
     def deployment(self, component, version, hosts, status='start', owner=None, env=None):
         """
-        Return a new Deployment object. Refer to bigpanda.Deployment for more help.
+        Return a new Deployment object associated with this client.
+        
+        Refer to bigpanda.Deployment for more help.
         """
         return deployment.Deployment(component, version, hosts, status, owner, env, client=self)
 
     def alert(self, status, subject, check=None, description=None, cluster=None, timestamp=None, primary_attr='host', secondary_attr='check', **kwargs):
         """
-        Return a new Alert object. Refer to bigpanda.Alert for more help.
+        Return a new Alert object associated with this client.
+        
+        Refer to bigpanda.Alert for more help.
         """
         return alert.Alert(status, subject, check, description, cluster, timestamp, primary_attr, secondary_attr, client=self, **kwargs)
 
