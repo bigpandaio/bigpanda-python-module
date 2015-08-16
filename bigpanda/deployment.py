@@ -92,6 +92,7 @@ class Deployment(object):
         Equivalent to setting .status to 'failure' and .message, then calling send().
         """
         self.status = 'failure'
+        self.message = message
         return self.send()
 
     def _verify_parameters(self):
