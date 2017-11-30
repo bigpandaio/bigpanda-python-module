@@ -63,7 +63,7 @@ class Alert(object):
         self.secondary_attr = secondary_attr
         self.extra_attrs = kwargs
         self._client = client
-        
+
         self._verify_parameters()
 
     def _build_payload(self):
@@ -76,7 +76,7 @@ class Alert(object):
         try:
             payload['status'] = self._api_statuses[self.status]
         except KeyError:
-            raise ValueError("status must be one of: " + ", ".join(api_statuses))
+            raise ValueError("status must be one of: " + ", ".join(self.api_statuses))
 
         if self.check:
             payload[self.secondary_attr] = str(self.check)
