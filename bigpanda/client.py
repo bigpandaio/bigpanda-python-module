@@ -7,14 +7,12 @@ except ImportError:
 import config
 import deployment
 import alert
-from requests import Session
-from requests.adapters import HTTPAdapter
 
 class Client(object):
     """
     BigPanda Client object, used to send alerts and deployments.
     """ 
-    def __init__(self, api_token, app_key=None, base_url=config.base_url, timeout=10, max_retries=5, supress_app_key=False):
+    def __init__(self, api_token, app_key=None, base_url=config.base_url):
         """
         Create a new Client object, used to send alerts and deployments.
 
@@ -24,10 +22,6 @@ class Client(object):
         self.api_token = api_token
         self.app_key = app_key
         self.base_url = base_url
-        self.time_out = timeout
-        self.max_retries = max_retries
-        self.supress_app_key = supress_app_key
-        self.session = Session()
 
     def deployment(self, component, version, hosts, status='start', owner=None, env=None):
         """
@@ -70,30 +64,21 @@ class Client(object):
 
         # Deployments don't have app_key just yet
         if data_type == 'alert':
-            if not self.app_key and not self.supress_app_key:
+            if not self.app_key:
                 raise RuntimeError("app_key is not set")
             payload['app_key'] = self.app_key
-
-        self.post_payload = payload
 
         self._api_call(endpoint, payload)
 
     def _api_call(self, endpoint, data=None):
-
-        if self.session is None:
-            self.session = Session()
-
         headers = {'Authorization': 'Bearer %s' % self.api_token,
                     'Content-Type': 'application/json'}
 
-        s = requests.Session()
-        s.mount(self.base_url + endpoint, HTTPAdapter(max_retries=self.max_retries))
-
         if data:
             self.data = data
-            r = s.post(self.base_url + endpoint, data=json.dumps(data), headers=headers, timeout=self.time_out)
+            r = requests.post(self.base_url + endpoint, data=json.dumps(data), headers=headers)
         else:
-            r = s.get(self.base_url + endpoint, headers=headers, timeout=self.time_out)
+            r = requests.get(self.base_url + endpoint, headers=headers)
 
         r.raise_for_status()
 

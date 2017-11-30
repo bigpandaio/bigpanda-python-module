@@ -4,7 +4,7 @@ from setuptools import setup
 
 requires = open('requirements.txt').readlines()
 setup(name='bigpanda',
-      version='2.2',
+      version='2.1',
       description='Python module for integration with BigPanda',
       author='BigPanda',
       author_email='support@bigpanda.io',
