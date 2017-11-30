@@ -14,7 +14,7 @@ class Client(object):
     """
     BigPanda Client object, used to send alerts and deployments.
     """ 
-    def __init__(self, api_token, app_key=None, base_url=config.base_url, timeout=10, max_retries=5, supress_app_key=False):
+    def __init__(self, api_token, app_key=None, base_url=config.base_url, timeout=10, max_retries=5, suppress_app_key=False):
         """
         Create a new Client object, used to send alerts and deployments.
 
@@ -26,7 +26,7 @@ class Client(object):
         self.base_url = base_url
         self.time_out = timeout
         self.max_retries = max_retries
-        self.supress_app_key = supress_app_key
+        self.suppress_app_key = suppress_app_key
         self.session = Session()
 
     def deployment(self, component, version, hosts, status='start', owner=None, env=None):
@@ -70,7 +70,7 @@ class Client(object):
 
         # Deployments don't have app_key just yet
         if data_type == 'alert':
-            if not self.app_key and not self.supress_app_key:
+            if not self.app_key and not self.suppress_app_key:
                 raise RuntimeError("app_key is not set")
             payload['app_key'] = self.app_key
 
