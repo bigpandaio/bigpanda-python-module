@@ -8,7 +8,7 @@ setup(name='bigpanda',
       description='Python module for integration with BigPanda',
       author='BigPanda',
       author_email='support@bigpanda.io',
-      url='bigpanda.io',
+      url='https://bigpanda.io',
       packages=['bigpanda'],
       install_requires=requires
 )
